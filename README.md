@@ -11,18 +11,10 @@ A multithreaded campus parking management system built entirely with the Python 
 
 ## Architecture
 
-```
-                 ┌──────────────┐
-  text clients ──►  TextServer  │─┐
-                 └──────────────┘ │   ┌────────────────┐   ┌──────────────┐
-                 ┌──────────────┐ ├──►│ ParkingService │──►│ ParkingState │
-  RPC  clients ──►  RpcServer   │─┘   └───────┬────────┘   └──────────────┘
-                 └──────────────┘             │
-                                              ▼
-                 ┌──────────────┐       ┌──────────┐     ┌──────────────┐
-  sensors ──────►│ SensorServer │──Q──►│  PubSub  │◄────│   Notifier   │──► subscribers
-                 └──────────────┘       └──────────┘     └──────────────┘
-```
+- text clients -> TextServer -> ParkingService -> ParkingState
+- RPC clients -> RpcServer -> ParkingService -> ParkingState
+- sensors -> SensorServer -> update Queue -> worker -> ParkingState
+- ParkingService / worker -> PubSub -> Notifier -> subscribers
 
 ### Concurrency model
 
@@ -38,12 +30,7 @@ Reservations automatically expire after a configurable TTL (default 300 s / 5 mi
 
 ### Framing
 
-```
-┌──────────────────┬───────────────────────────┐
-│ 4 bytes (big-end)│  N bytes JSON (UTF-8)     │
-│  payload length  │  request or reply          │
-└──────────────────┴───────────────────────────┘
-```
+Each frame consists of: 4 bytes (big-endian payload length) -> N bytes JSON payload (UTF-8 request or reply)
 
 - Length prefix: **big-endian unsigned 32-bit int** (`struct.pack("!I", …)`), following the network byte order convention.
 - All values are JSON-encoded: `str`, `int`, `float`, `bool`, `null`, `list`, `dict`.
@@ -74,9 +61,7 @@ Reservations automatically expire after a configurable TTL (default 300 s / 5 mi
 
 ### RPC path
 
-```
-Caller → Client Stub → TCP → Server Skeleton → Method → Return → Client Stub → Caller
-```
+Caller -> Client Stub -> TCP -> Server Skeleton -> Method -> Return -> Client Stub -> Caller
 
 ## Pub/Sub
 
