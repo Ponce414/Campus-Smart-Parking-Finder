@@ -1,0 +1,3 @@
+# Runtime: stdlib only (no third-party packages required)
+# Test dependency:
+pytest>=7.0
