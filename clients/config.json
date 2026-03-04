@@ -1,0 +1,10 @@
+{
+  "rpc_host": "127.0.0.1",
+  "rpc_port": 5000,
+  "sensor_host": "127.0.0.1",
+  "sensor_port": 5001,
+  "events_host": "127.0.0.1",
+  "events_port": 5002,
+  "text_host": "127.0.0.1",
+  "text_port": 5003
+}
